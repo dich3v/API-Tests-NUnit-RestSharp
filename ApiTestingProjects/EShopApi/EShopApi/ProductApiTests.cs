@@ -75,5 +75,42 @@ namespace EShopApi
                 }
             });
         }
+        [Test, Order(2)]
+
+        public void Test_AddProduct()
+        {
+            var request = new RestRequest("product", Method.Post);
+            request.AddHeader("Authorization", $"Bearer {token}");
+            request.AddJsonBody(new
+            {
+                title = "New Product",
+                slug = "new-product",
+                description = "New Description",
+                price = 99.99,
+                category = "test",
+                brand = "test",
+                quantity = 50
+            });
+
+            var response = client.Execute(request);
+
+            Assert.Multiple(() =>
+            {
+
+                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK), "Status code is not OK");
+
+                Assert.That(response.Content, Is.Not.Empty, "Response content is empty");
+
+                var content = JObject.Parse(response.Content);
+
+                Assert.That(content["title"].ToString(), Is.EqualTo("New Product"));
+                Assert.That(content["slug"].ToString(), Is.EqualTo("new-product"));
+                Assert.That(content["description"].ToString(), Is.EqualTo("New Description"));
+                Assert.That(content["price"].Value<decimal>(), Is.EqualTo(99.99));
+                Assert.That(content["category"].ToString(), Is.EqualTo("test"));
+                Assert.That(content["brand"].ToString(), Is.EqualTo("test"));
+                Assert.That(content["quantity"].Value<int>(), Is.EqualTo(50));
+            });
+        }
     }
 }
